@@ -24,7 +24,7 @@ proc prox {local addr port} {
 
     if {$::settings(only_local)} {
         if {$addr ne "127.0.0.1"} {
-            Event "Blocked request from $addr:$port."
+            logEvent "Blocked request from $addr:$port."
             close $local
             return
         }
@@ -408,7 +408,7 @@ proc route {local host port log_num} {
     if {$e} {
         dlog "Couldn't open socket to remote host."
         dlog $err
-        EventAppend $ei " (error)"
+        logEvent $ei " (error)"
         close $local
         return ""
     }
@@ -459,16 +459,16 @@ proc read_remote {log_num ei local remote} {
         if {$complete != 0 || $incomplete != 0 || $interval != 0} {
             set peers " ($complete/$incomplete, [FormatElapsed $interval])"
             dlog "Found peer count: $peers"
-            EventAppend $ei $peers
+            logEvent $ei $peers
         } else {
             set fr {}
             if {[regexp {14:failure reason([0-9]+):} $l _ frlen]} {
                 if {[regexp "14:failure reason$frlen:(.{$frlen})" $l _ fr]} {
                     dlog "Failure reason: $fr"
-                    EventAppend $ei " (fail: $fr)"
+                    logEvent $ei " (fail: $fr)"
                 } else {
                     dlog "Bad failure reason"
-                    EventAppend $ei " (bad failure reason)"
+                    logEvent $ei " (bad failure reason)"
                 }
             }
         }
@@ -519,5 +519,5 @@ proc listen args {
 
     set listen_socket [socket -server prox $::settings(listen_port)]
     puts "Listening with $listen_socket on $::settings(listen_port)"
-    Event "Listening on 127.0.0.1:$::settings(listen_port)"
+    logEvent "Listening on 127.0.0.1:$::settings(listen_port)"
 }

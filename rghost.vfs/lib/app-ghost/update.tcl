@@ -30,6 +30,8 @@ if {$::MAC} {set os M}
 set check 0
 set skip_update 0
 set checking_update 0
+set useGUI 0
+set autoUpdate 0
 
 proc check_for_updates {} {
     global build check
@@ -64,7 +66,20 @@ proc update_complete {r} {
     puts "Received update info: $ncode"
 
     if {$ncode == 200 && [string match *yes* $data]} {
-        set r [tk_messageBox -title "Ratio Ghost Update Available" -message "There is a new version of Ratio Ghost available. Updating to the latest version is highly recommended. Would you like to update now?" -type yesno]
+        if {$::autoUpdate} {
+          set r yes
+        }
+        else {
+          if $::useGUI {
+            set r [tk_messageBox -title "Ratio Ghost Update Available" -message "There is a new version of Ratio Ghost available. Updating to the latest version is highly recommended. Would you like to update now?" -type yesno]
+          }
+          else {
+            puts "There is a new version of Ratio Ghost available. Updating to the latest version is highly recommended. Would you like to update now?"
+            flush stdout
+            set r [gets stdin]
+          }
+        }
+        
         if {$r eq {yes}} {
             OpenDocument http://RatioGhost.com/download
         } else {

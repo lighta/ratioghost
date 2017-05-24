@@ -16,12 +16,14 @@
 
 package provide app-util 1.0
 
+set useGUI 0
 
 proc OpenDocument {filename} {
     if {[catch {
         exec rundll32.exe url.dll,FileProtocolHandler $filename &
     }]} {
-        tk_messageBox -icon error -title "File Open Error" -message "Error opening $filename."
+      if $::useGUI { tk_messageBox -icon error -title "File Open Error" -message "Error opening $filename." } 
+      else { puts stderr "Error opening $filename." }
     }
 }
 
@@ -101,4 +103,30 @@ proc FormatElapsed {num} {
         set num [expr {round($num)}]
     }
     return "$num$post"
+}
+
+proc logEvent {message} {
+    set fname [file join [GetProfileDirectory] bgevent.txt]
+    set o [open $fname a]
+    puts $o "\n\n[clock format [clock seconds]] ([pid])\n$message\n\n"
+    close $o
+}
+
+proc logError {message} {
+    set fname [file join [GetProfileDirectory] bgerror.txt]
+    set o [open $fname a]
+    puts $o "\n\n[clock format [clock seconds]] ([pid])\n$message\n\n"
+    close $o
+}
+
+proc bgerror {message} {
+    global ProcessingError
+    if {$ProcessingError} return
+    set ProcessingError 1
+    set em "Background error: $message\n\n$::errorInfo"
+    tk_messageBox -title "Application Error" -message $em
+
+    logError $em
+
+    set ProcessingError 0
 }

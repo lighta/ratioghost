@@ -17,38 +17,21 @@
 
 set build 520
 set version 0.16
-
+set useGUI 0
 
 package provide app-ghost 1.0
 
 package require Tk
 package require app-util
-package require app-gui
 package require app-proxy
 package require app-update
+if $::useGUI { package require app-gui }
+
 
 update idletasks
 
-proc logerror {message} {
-    set fname [file join [GetProfileDirectory] bgerror.txt]
-    set o [open $fname a]
-    puts $o "\n\n[clock format [clock seconds]] ([pid])\n$message\n\n"
-    close $o
-}
-
-
 set ProcessingError 0
-proc bgerror {message} {
-    global ProcessingError
-    if {$ProcessingError} return
-    set ProcessingError 1
-    set em "Background error: $message\n\n$::errorInfo"
-    tk_messageBox -title "Application Error" -message $em
 
-    logerror $em
-
-    set ProcessingError 0
-}
 
 
 puts $::argv
@@ -88,8 +71,8 @@ proc LoadSettings {} {
     lappend defaults update 1
 
     lappend defaults min_peers 5
-    lappend defaults upup_ratio_a 4.0
-    lappend defaults upup_ratio_b 8.0
+    lappend defaults upup_ratio_a 2.0
+    lappend defaults upup_ratio_b 4.0
     lappend defaults updown_ratio_a 0.00
     lappend defaults updown_ratio_b 0.05
 
@@ -136,8 +119,13 @@ proc SaveSettings {} {
 
 
 proc Close {} {
-    set r [tk_messageBox -title "Ratio Ghost" -message "Are you sure you want to exit Ratio Ghost?" -type yesno -default no]
-
+    if $::useGUI { set r [tk_messageBox -title "Ratio Ghost" -message "Are you sure you want to exit Ratio Ghost?" -type yesno -default no] }
+    else {
+       puts "Are you sure you want to exit Ratio Ghost?"
+       flush stdout
+       set r [gets stdin]
+    }
+    
     if {$r eq "yes"} {
         Kill
         exit 0
@@ -207,7 +195,7 @@ proc update_status {} {
 
 
 LoadSettings
-CreateGui
+#CreateGui
 
 update_status
 
