@@ -21,7 +21,7 @@ set useGUI 0
 
 package provide app-ghost 1.0
 
-package require Tk
+#package require Tk
 package require app-util
 package require app-proxy
 package require app-update
@@ -154,7 +154,7 @@ proc Kill {} {
 proc update_status {} {
     after 2000 update_status
 
-    if {[wm state .] eq "withdrawn"} {return}
+    #if {[wm state .] eq "withdrawn"} {return}
 
     global status
     global actual_up actual_down reported_up reported_down
